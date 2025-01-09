@@ -16,11 +16,12 @@ DEMOPATH = ./src/demos/
 DEMOCOREFILES = $(DEMOPATH)main.cpp $(DEMOPATH)app.cpp $(DEMOPATH)timing.cpp
 
 # Demo files.
-DEMOLIST = ballistic bigballistic blob bridge explosion fireworks flightsim fracture platform ragdoll sailboat
+# DEMOLIST = ballistic bigballistic blob bridge explosion fireworks flightsim fracture platform ragdoll sailboat
+DEMOLIST = ballistic
 
 # Cyclone core files.
-CYCLONEFILES = ./src/body.cpp ./src/collide_coarse.cpp ./src/collide_fine.cpp ./src/contacts.cpp ./src/core.cpp ./src/fgen.cpp ./src/joints.cpp ./src/particle.cpp ./src/pcontacts.cpp ./src/pfgen.cpp ./src/plinks.cpp ./src/pworld.cpp ./src/random.cpp ./src/world.cpp
-
+# CYCLONEFILES = ./src/body.cpp ./src/collide_coarse.cpp ./src/collide_fine.cpp ./src/contacts.cpp ./src/core.cpp ./src/fgen.cpp ./src/joints.cpp ./src/particle.cpp ./src/pcontacts.cpp ./src/pfgen.cpp ./src/plinks.cpp ./src/pworld.cpp ./src/random.cpp ./src/world.cpp
+CYCLONEFILES = ./src/core.cpp ./src/particle.cpp
 .PHONY: clean
 
 all: $(DEMOLIST)

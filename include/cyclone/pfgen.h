@@ -60,7 +60,7 @@ namespace cyclone {
              * Holds the list of registered particle-generator pairs
              */
             typedef std::vector<ParticleForceRegistration> Registry;
-            Registry registration;
+            Registry registrations;
 
         public:
 

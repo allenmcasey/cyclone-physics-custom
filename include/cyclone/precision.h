@@ -11,17 +11,6 @@
  * software licence.
  */
 
-/**
- * @file
- *
- * Because Cyclone is designed to work at either single or double
- * precision, mathematical functions such as sqrt cannot be used
- * in the source code or headers. This file provides defines for
- * the real number type and mathematical formulae that work on it.
- *
- * @note All the contents of this file need to be changed to compile
- * Cyclone at a different precision.
- */
 #ifndef CYCLONE_PRECISION_H
 #define CYCLONE_PRECISION_H
 

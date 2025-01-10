@@ -92,13 +92,13 @@ void DampingTest::update()
     cyclone::Particle *particle = particles;
 
     // Run the physics
-    particle->integrate(duration, 0);
+    particle->integrate(duration);
     std::cout << particle->getPosition().x << " " << particle->getPosition().y << std::endl;
 
     particle++;
 
     // Run the physics
-    particle->integrate(duration, 1);
+    particle->integrate(duration);
     std::cout << particle->getPosition().x << " " << particle->getPosition().y << std::endl;
 
     // // Update the physics of each particle in turn

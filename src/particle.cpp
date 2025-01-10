@@ -26,7 +26,7 @@ void Particle::integrate(real duration)
 
     // Work out the acceleration from the force
     Vector3 resultingAcc = acceleration;
-    // resultingAcc.addScaledVector(forceAccum, inverseMass);
+    resultingAcc.addScaledVector(forceAccum, inverseMass);
 
     // Update linear velocity from the acceleration.
     velocity.addScaledVector(resultingAcc, duration);
@@ -147,6 +147,11 @@ void Particle::getAcceleration(Vector3 *acceleration) const
 Vector3 Particle::getAcceleration() const
 {
     return acceleration;
+}
+
+void Particle::addForce(const Vector3 &force)
+{
+    forceAccum += force;
 }
 
 void Particle::clearAccumulator()

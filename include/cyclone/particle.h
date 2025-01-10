@@ -259,15 +259,11 @@ namespace cyclone {
          */
         Vector3 getAcceleration() const;
 
-        /*@}*/
-
         /**
-         * @name Force Set-up Functions
-         *
-         * These functions set up forces to apply to the
-         * particle.
+         * Adds the given force to the particle to be applied at the
+         * next iteration only.
          */
-        /*@{*/
+        void addForce(const Vector3 &force);
 
         /**
          * Clears the forces applied to the particle. This will be

@@ -71,7 +71,6 @@ namespace cyclone {
 
         // ... Other Vector3 code as before ...
 
-
         real operator[](unsigned i) const
         {
             if (i == 0) return x;
@@ -328,7 +327,6 @@ namespace cyclone {
             y = -y;
             z = -z;
         }
-
     };
 }
 

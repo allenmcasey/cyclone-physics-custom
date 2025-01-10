@@ -17,12 +17,6 @@
 using namespace cyclone;
 
 
-/*
- * --------------------------------------------------------------------------
- * FUNCTIONS DECLARED IN HEADER:
- * --------------------------------------------------------------------------
- */
-
 void Particle::integrate(real duration)
 {
     // We don't integrate things with zero mass.
@@ -45,7 +39,7 @@ void Particle::integrate(real duration)
     position.addScaledVector(velocity, duration);
 
     // Clear the forces.
-    // clearAccumulator();
+    clearAccumulator();
 }
 
 

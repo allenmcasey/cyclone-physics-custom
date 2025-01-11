@@ -2,18 +2,41 @@
  * Implementation file for the particle force generators.
  *
  * Part of the Cyclone physics system.
- *
- * Copyright (c) Icosagon 2003. All Rights Reserved.
- *
- * This software is distributed under licence. Use of this software
- * implies agreement with all terms and conditions of the accompanying
- * software licence.
  */
+
 
 #include <cyclone/pfgen.h>
 
 using namespace cyclone;
 
+void ParticleForceRegistry::add(Particle* particle, ParticleForceGenerator* fg)
+{
+    ParticleForceRegistry::ParticleForceRegistration newRegistration;
+    newRegistration.particle = particle;
+    newRegistration.fg = fg;
+
+    registrations.push_back(newRegistration);
+}
+
+void ParticleForceRegistry::remove(Particle* particle, ParticleForceGenerator* fg)
+{
+    Registry::iterator i = registrations.begin();
+    while (i != registrations.end())
+    {
+        if ((i->particle == particle) && (i->fg == fg))
+        {
+            registrations.erase(i);
+            break;
+        }
+
+        i++;
+    }
+}
+
+void ParticleForceRegistry::clear()
+{
+    registrations.clear();
+}
 
 void ParticleForceRegistry::updateForces(real duration)
 {
@@ -24,212 +47,95 @@ void ParticleForceRegistry::updateForces(real duration)
     }
 }
 
-void ParticleForceRegistry::add(Particle* particle, ParticleForceGenerator *fg)
+ParticleGravity::ParticleGravity(const Vector3& gravity) : gravity(gravity)
 {
-    ParticleForceRegistry::ParticleForceRegistration registration;
-    registration.particle = particle;
-    registration.fg = fg;
-    registrations.push_back(registration);
 }
 
-ParticleGravity::ParticleGravity(const Vector3& gravity)
-: gravity(gravity)
-{
-}
+ParticleGravity::ParticleGravity(){}
 
 void ParticleGravity::updateForce(Particle* particle, real duration)
 {
-    // Check that we do not have infinite mass
+    // Ensure particle does not have infiinite mass.
     if (!particle->hasFiniteMass()) return;
 
-    // Apply the mass-scaled force to the particle
+    // Apply mass-scaled gravitational force to given particle.
     particle->addForce(gravity * particle->getMass());
 }
 
-ParticleDrag::ParticleDrag(real k1, real k2)
-: k1(k1), k2(k2)
+ParticlePointGravity::ParticlePointGravity(){}
+
+ParticlePointGravity::ParticlePointGravity(const real& gravityScalar, const Vector3& gravityPoint)
 {
+    ParticlePointGravity::gravityScalar = gravityScalar;
+    ParticlePointGravity::gravityPoint = gravityPoint;
 }
 
-void ParticleDrag::updateForce(Particle* particle, real duration)
+void ParticlePointGravity::updateForce(Particle* particle, real duration)
 {
-    Vector3 force;
-    particle->getVelocity(&force);
+    // Ensure particle does not have infiinite mass.
+    if (!particle->hasFiniteMass()) return;
 
-    // Calculate the total drag coefficient
-    real dragCoeff = force.magnitude();
-    dragCoeff = k1 * dragCoeff + k2 * dragCoeff * dragCoeff;
+    // Get position vector from particle to gravity point
+    Vector3 particleToPoint = gravityPoint - particle->getPosition();
 
-    // Calculate the final force and apply it
-    force.normalise();
-    force *= -dragCoeff;
-    particle->addForce(force);
-}
+    // Get distance from particle to grav point
+    real particleToPointDist = particleToPoint.magnitude();
 
-ParticleSpring::ParticleSpring(Particle *other, real sc, real rl)
-: other(other), springConstant(sc), restLength(rl)
-{
-}
-
-void ParticleSpring::updateForce(Particle* particle, real duration)
-{
-    // Calculate the vector of the spring
-    Vector3 force;
-    particle->getPosition(&force);
-    force -= other->getPosition();
-
-    // Calculate the magnitude of the force
-    real magnitude = force.magnitude();
-    magnitude = real_abs(magnitude - restLength);
-    magnitude *= springConstant;
-
-    // Calculate the final force and apply it
-    force.normalise();
-    force *= -magnitude;
-    particle->addForce(force);
-}
-
-ParticleBuoyancy::ParticleBuoyancy(real maxDepth,
-                                 real volume,
-                                 real waterHeight,
-                                 real liquidDensity)
-:
-maxDepth(maxDepth), volume(volume),
-waterHeight(waterHeight), liquidDensity(liquidDensity)
-{
-}
-
-void ParticleBuoyancy::updateForce(Particle* particle, real duration)
-{
-    // Calculate the submersion depth
-    real depth = particle->getPosition().y;
-
-    // Check if we're out of the water
-    if (depth >= waterHeight + maxDepth) return;
-    Vector3 force(0,0,0);
-
-    // Check if we're at maximum depth
-    if (depth <= waterHeight - maxDepth)
+    if (particleToPointDist < 0.5)
     {
-        force.y = liquidDensity * volume;
-        particle->addForce(force);
+        particle->setVelocity(cyclone::Vector3(0,0,0));
         return;
     }
 
-    // Otherwise we are partly submerged
-    force.y = liquidDensity * volume *
-        (depth - maxDepth - waterHeight) / (2 * maxDepth);
-    particle->addForce(force);
+    // Get unit vector from particle to point
+    particleToPoint.normalise();
+
+    // Get force vector of gravity on particle, scaled by particle's distance from gravity point
+    Vector3 scaledPointGravity = (particleToPoint * (gravityScalar * particle->getMass())) * ((real)1.0 / real_pow(particleToPointDist, 1.5));
+    // Vector3 scaledPointGravity = (particleToPoint * (gravityScalar * particle->getMass())) * ((real)1.0 / particleToPointDist);
+
+    // Apply distance- and mass-scaled gravity to particle toward gravity point
+    particle->addForce(scaledPointGravity);
 }
 
-ParticleBungee::ParticleBungee(Particle *other, real sc, real rl)
-: other(other), springConstant(sc), restLength(rl)
+ParticleUplift::ParticleUplift(const Vector3& upliftForce, const Vector3& upliftPoint, const real& upliftRadius, const real& maxUpliftHeight, const ParticleGravity& gravity) : 
+    upliftForce(upliftForce), 
+    upliftPoint(upliftPoint),
+    upliftRadius(upliftRadius),
+    maxUpliftHeight(maxUpliftHeight),
+    gravity(gravity)
 {
 }
 
-void ParticleBungee::updateForce(Particle* particle, real duration)
+ParticleUplift::ParticleUplift(){}
+
+Vector3 ParticleGravity::getGravity() const
 {
-    // Calculate the vector of the spring
-    Vector3 force;
-    particle->getPosition(&force);
-    force -= other->getPosition();
-
-    // Check if the bungee is compressed
-    real magnitude = force.magnitude();
-    if (magnitude <= restLength) return;
-
-    // Calculate the magnitude of the force
-    magnitude = springConstant * (restLength - magnitude);
-
-    // Calculate the final force and apply it
-    force.normalise();
-    force *= -magnitude;
-    particle->addForce(force);
+    return gravity;
 }
 
-ParticleFakeSpring::ParticleFakeSpring(Vector3 *anchor, real sc, real d)
-: anchor(anchor), springConstant(sc), damping(d)
+void ParticleUplift::updateForce(Particle* particle, real duration)
 {
-}
-
-void ParticleFakeSpring::updateForce(Particle* particle, real duration)
-{
-    // Check that we do not have infinite mass
+    // Ensure particle does not have infiinite mass.
     if (!particle->hasFiniteMass()) return;
 
-    // Calculate the relative position of the particle to the anchor
-    Vector3 position;
-    particle->getPosition(&position);
-    position -= *anchor;
+    Vector3 particlePosition = particle->getPosition();
 
-    // Calculate the constants and check they are in bounds.
-    real gamma = 0.5f * real_sqrt(4 * springConstant - damping*damping);
-    if (gamma == 0.0f) return;
-    Vector3 c = position * (damping / (2.0f * gamma)) +
-        particle->getVelocity() * (1.0f / gamma);
+    // Ensure particle is in uplift radius of effect
+    Vector3 particleToPoint = upliftPoint - particlePosition;
+    if (particleToPoint.magnitude() > upliftRadius) return; 
 
-    // Calculate the target position
-    Vector3 target = position * real_cos(gamma * duration) +
-        c * real_sin(gamma * duration);
-    target *= real_exp(-0.5f * duration * damping);
+    if (particlePosition.y >= maxUpliftHeight)
+    {
+        // If particle is at max height, stop its motion
+        particle->setVelocity(cyclone::Vector3(0,0,0));
 
-    // Calculate the resulting acceleration and therefore the force
-    Vector3 accel = (target - position) * ((real)1.0 / (duration*duration)) -
-        particle->getVelocity() * ((real)1.0/duration);
-    particle->addForce(accel * particle->getMass());
-}
-
-ParticleAnchoredSpring::ParticleAnchoredSpring()
-{
-}
-
-ParticleAnchoredSpring::ParticleAnchoredSpring(Vector3 *anchor,
-                                               real sc, real rl)
-: anchor(anchor), springConstant(sc), restLength(rl)
-{
-}
-
-void ParticleAnchoredSpring::init(Vector3 *anchor, real springConstant,
-                                  real restLength)
-{
-    ParticleAnchoredSpring::anchor = anchor;
-    ParticleAnchoredSpring::springConstant = springConstant;
-    ParticleAnchoredSpring::restLength = restLength;
-}
-
-void ParticleAnchoredBungee::updateForce(Particle* particle, real duration)
-{
-    // Calculate the vector of the spring
-    Vector3 force;
-    particle->getPosition(&force);
-    force -= *anchor;
-
-    // Calculate the magnitude of the force
-    real magnitude = force.magnitude();
-    if (magnitude < restLength) return;
-
-    magnitude = magnitude - restLength;
-    magnitude *= springConstant;
-
-    // Calculate the final force and apply it
-    force.normalise();
-    force *= -magnitude;
-    particle->addForce(force);
-}
-
-void ParticleAnchoredSpring::updateForce(Particle* particle, real duration)
-{
-    // Calculate the vector of the spring
-    Vector3 force;
-    particle->getPosition(&force);
-    force -= *anchor;
-
-    // Calculate the magnitude of the force
-    real magnitude = force.magnitude();
-    magnitude = (restLength - magnitude) * springConstant;
-
-    // Calculate the final force and apply it
-    force.normalise();
-    force *= magnitude;
-    particle->addForce(force);
+        // Apply negative of gravitational force to given particle.
+        particle->addForce(gravity.getGravity() * (-1.0 *particle->getMass()));
+    }
+    else
+    {
+        // Apply mass-scaled gravitational force to given particle.
+        particle->addForce(upliftForce * particle->getMass());
+    }
 }

@@ -11,16 +11,11 @@
  */
 
 #include <assert.h>
+#include <iostream>
 #include <cyclone/particle.h>
 
 using namespace cyclone;
 
-
-/*
- * --------------------------------------------------------------------------
- * FUNCTIONS DECLARED IN HEADER:
- * --------------------------------------------------------------------------
- */
 
 void Particle::integrate(real duration)
 {
@@ -29,8 +24,7 @@ void Particle::integrate(real duration)
 
     assert(duration > 0.0);
 
-    // Update linear position.
-    position.addScaledVector(velocity, duration);
+    std::cout << forceAccum.y << std::endl;
 
     // Work out the acceleration from the force
     Vector3 resultingAcc = acceleration;
@@ -38,14 +32,17 @@ void Particle::integrate(real duration)
 
     // Update linear velocity from the acceleration.
     velocity.addScaledVector(resultingAcc, duration);
+    std::cout << velocity.y << std::endl;
 
     // Impose drag.
     velocity *= real_pow(damping, duration);
 
+    // Update linear position.
+    position.addScaledVector(velocity, duration);
+
     // Clear the forces.
     clearAccumulator();
 }
-
 
 
 void Particle::setMass(const real mass)
@@ -154,12 +151,12 @@ Vector3 Particle::getAcceleration() const
     return acceleration;
 }
 
-void Particle::clearAccumulator()
-{
-    forceAccum.clear();
-}
-
 void Particle::addForce(const Vector3 &force)
 {
     forceAccum += force;
+}
+
+void Particle::clearAccumulator()
+{
+    forceAccum.clear();
 }

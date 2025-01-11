@@ -25,7 +25,4 @@ xcuserdata
 *.moved-aside
 
 # Compiled Linux files
-ballistic
-dampingtest
-pointgrav
-
+build/*

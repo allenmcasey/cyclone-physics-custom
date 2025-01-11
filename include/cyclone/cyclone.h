@@ -12,7 +12,7 @@
 #include "precision.h"
 #include "core.h"
 #include "particle.h"
-
+#include "pfgen.h"
 
 // #include "random.h"
 // #include "body.h"

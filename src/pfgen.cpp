@@ -2,13 +2,8 @@
  * Implementation file for the particle force generators.
  *
  * Part of the Cyclone physics system.
- *
- * Copyright (c) Icosagon 2003. All Rights Reserved.
- *
- * This software is distributed under licence. Use of this software
- * implies agreement with all terms and conditions of the accompanying
- * software licence.
  */
+
 
 #include <cyclone/pfgen.h>
 
@@ -50,4 +45,52 @@ void ParticleForceRegistry::updateForces(real duration)
     {
         i->fg->updateForce(i->particle, duration);
     }
+}
+
+ParticleGravity::ParticleGravity(const Vector3& gravity) : gravity(gravity)
+{
+}
+
+void ParticleGravity::updateForce(Particle* particle, real duration)
+{
+    // Ensure particle does not have infiinite mass.
+    if (!particle->hasFiniteMass()) return;
+
+    // Apply mass-scaled gravitational force to given particle.
+    particle->addForce(gravity * particle->getMass());
+}
+
+ParticlePointGravity::ParticlePointGravity(){}
+
+ParticlePointGravity::ParticlePointGravity(const real& gravityScalar, const Vector3& gravityPoint)
+{
+    ParticlePointGravity::gravityScalar = gravityScalar;
+    ParticlePointGravity::gravityPoint = gravityPoint;
+}
+
+void ParticlePointGravity::updateForce(Particle* particle, real duration)
+{
+    // Ensure particle does not have infiinite mass.
+    if (!particle->hasFiniteMass()) return;
+
+    // Get position vector from particle to gravity point
+    Vector3 particleToPoint = gravityPoint - particle->getPosition();
+
+    // Get distance from particle to grav point
+    real particleToPointDist = particleToPoint.magnitude();
+
+    if (particleToPointDist < 0.5)
+    {
+        particle->setVelocity(cyclone::Vector3(0,0,0));
+    }
+
+    // Get unit vector from particle to point
+    particleToPoint.normalise();
+
+    // Get force vector of gravity on particle, scaled by particle's distance from gravity point
+    Vector3 scaledPointGravity = (particleToPoint * (gravityScalar * particle->getMass())) * ((real)1.0 / real_pow(particleToPointDist, 1.5));
+    // Vector3 scaledPointGravity = (particleToPoint * (gravityScalar * particle->getMass())) * ((real)1.0 / particleToPointDist);
+
+    // Apply distance- and mass-scaled gravity to particle toward gravity point
+    particle->addForce(scaledPointGravity);
 }

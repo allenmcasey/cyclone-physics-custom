@@ -36,7 +36,7 @@ namespace cyclone {
              * Overload this method in the implementation of the interface
              * to calculate and update the force applied to th given particle.
              */
-            virtual void updateForce(Particle* particle, real duration); 
+            virtual void updateForce(Particle* particle, real duration) = 0; 
     };
 
     /**
@@ -90,7 +90,61 @@ namespace cyclone {
              */
             void updateForces(real duration);
     };
-   
+
+    /**
+     * A force generator used to apply a gravitational force. One
+     * instance can be used for multiple particles.
+     */
+    class ParticleGravity : public ParticleForceGenerator
+    {
+        /**
+         * Holds the acceleration due to gravity.
+         */
+        Vector3 gravity;
+
+        public:
+
+            /**
+             * Creates the generator with the given acceleration.
+             */
+            ParticleGravity(const Vector3 &gravity);
+
+            /**
+             * Applies the gravitational force to the given particle.
+             */
+            virtual void updateForce(Particle* particle, real duration);
+    };
+
+    class ParticlePointGravity : public ParticleForceGenerator
+    {
+        /**
+         * Holds the scalar acceleration due to gravity. This force is scaled
+         * based on the inverse square of the distance between the given
+         * particle and the gravityPoint.
+         */
+        real gravityScalar;
+
+        /**
+         * Holds the position of the gravitational
+         * attraction. All registered particles will be 
+         * pulled toward this location.
+         */
+        Vector3 gravityPoint;
+
+        public:
+
+            /**
+             * Creates the generator with the given acceleration and attraction point.
+             */
+            ParticlePointGravity(const real &gravityScalar, const Vector3 &gravityPoint);
+            ParticlePointGravity();
+
+            /**
+             * Applies the gravitational force to the given particle.
+             */
+            virtual void updateForce(Particle* particle, real duration);
+    };
 }
+
 
 #endif // CYCLONE_PFGEN_H

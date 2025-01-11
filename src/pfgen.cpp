@@ -166,3 +166,59 @@ void ParticleSpring::updateForce(Particle* particle, real duration)
     force *= -magnitude;
     particle->addForce(force);
 }
+
+ParticleAnchoredSpring::ParticleAnchoredSpring(Vector3* anchorPoint, real& springConstant, real& restLength) : 
+    anchorPoint(anchorPoint), 
+    springConstant(springConstant),
+    restLength(restLength)
+{
+}
+
+ParticleAnchoredSpring::ParticleAnchoredSpring(){}
+
+void ParticleAnchoredSpring::updateForce(Particle* particle, real duration)
+{
+    // Calculate the vector of the spring.
+    Vector3 force;
+    particle->getPosition(&force);
+    force -= *anchorPoint;
+
+    // Calculate the magnituge of the spring force.
+    real magnitude = force.magnitude();
+    magnitude = (magnitude - restLength) * springConstant;
+
+    // Calculate final force and apply it.
+    force.normalise();
+    force *= -magnitude;
+    particle->addForce(force);
+}
+
+
+ParticleBungee::ParticleBungee(Particle* other, real& springConstant, real& restLength) : 
+    other(other), 
+    springConstant(springConstant),
+    restLength(restLength)
+{
+}
+
+ParticleBungee::ParticleBungee(){}
+
+void ParticleBungee::updateForce(Particle* particle, real duration) 
+{
+    // Calculate the vector of the spring.
+    Vector3 force;
+    particle->getPosition(&force);
+    force -= other->getPosition();
+
+    // Check if bungee is compressed; if so, return.
+    real magnitude = force.magnitude();
+    if (magnitude <= restLength) return;
+
+    // Calculate the magnitude of the force.
+    magnitude = (restLength - magnitude) * springConstant;
+
+    // Calculate final force and apply it.
+    force.normalise();
+    force *= -magnitude;
+    particle->addForce(force);
+}

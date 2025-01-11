@@ -24,6 +24,8 @@ void Particle::integrate(real duration)
 
     assert(duration > 0.0);
 
+    std::cout << forceAccum.y << std::endl;
+
     // Work out the acceleration from the force
     Vector3 resultingAcc = acceleration;
     resultingAcc.addScaledVector(forceAccum, inverseMass);

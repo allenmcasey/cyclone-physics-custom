@@ -108,6 +108,12 @@ namespace cyclone {
              * Creates the generator with the given acceleration.
              */
             ParticleGravity(const Vector3 &gravity);
+            ParticleGravity();
+
+            /**
+             * Returns this force generator's gravity vector.
+             */
+            Vector3 getGravity() const;
 
             /**
              * Applies the gravitational force to the given particle.
@@ -138,6 +144,61 @@ namespace cyclone {
              */
             ParticlePointGravity(const real &gravityScalar, const Vector3 &gravityPoint);
             ParticlePointGravity();
+
+            /**
+             * Applies the gravitational force to the given particle.
+             */
+            virtual void updateForce(Particle* particle, real duration);
+    };
+
+    /**
+     * A force generator used to apply a gravitational force. One
+     * instance can be used for multiple particles.
+     */
+    class ParticleUplift : public ParticleForceGenerator
+    {
+        /**
+         * Holds the acceleration due to gravity.
+         */
+        Vector3 upliftForce;
+
+        /**
+         * Center point of area affected by uplift force.
+         */
+        Vector3 upliftPoint;
+
+        /**
+         * Radius from uplift point that uplift force
+         * has effect.
+         */
+        real upliftRadius;
+
+        /**
+         * Holds the maximum height (y-val) that this
+         * force generator can lift a particle.
+         */
+        real maxUpliftHeight;
+
+        /**
+         * Gravity force generator associated with this uplift
+         * generator. Once the uplift generator gets the particle
+         * to the max uplift height, the force added to this particle
+         * is the negative of the gravity force so that the particle 
+         * levitates in place.
+         */
+        ParticleGravity gravity;
+
+        public:
+
+            /**
+             * Creates the generator with the given acceleration.
+             */
+            ParticleUplift(const Vector3 &upliftForce, 
+                            const Vector3 &upliftPoint,
+                            const real &upliftRadius,
+                            const real &maxUpliftHeight,
+                            const ParticleGravity &gravity);
+            ParticleUplift();
 
             /**
              * Applies the gravitational force to the given particle.

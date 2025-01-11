@@ -205,6 +205,21 @@ namespace cyclone {
              */
             virtual void updateForce(Particle* particle, real duration);
     };
+
+    class ParticleSpring : ParticleForceGenerator
+    {
+        Particle* other;
+
+        real springConstant;
+
+        real restLength;
+
+    public:
+
+        ParticleSpring(Particle* other, real springConstant, real restLength);
+
+        virtual void updateForce(Particle* particle, real duration);
+    };
 }
 
 

@@ -26,10 +26,13 @@ DEMOLIST = ballistic uplift
 CYCLONEFILES = ./src/core.cpp ./src/particle.cpp ./src/pfgen.cpp
 .PHONY: clean
 
-all: $(DEMOLIST)
+all: build $(DEMOLIST)
+
+build:
+	mkdir ./build
 
 $(DEMOLIST):
 	g++ -O2 -Iinclude $(DEMOCOREFILES) $(CYCLONEFILES) $(DEMOPATH)$@/$@.cpp -o $(BUILDPATH)$@ $(LDFLAGS) 
 
 clean:
-	rm $(BUILDPATH)$(DEMOLIST)
+	rm -r ./build

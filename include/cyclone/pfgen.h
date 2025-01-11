@@ -239,6 +239,39 @@ namespace cyclone {
          */
         virtual void updateForce(Particle* particle, real duration);
     };
+
+    class ParticleAnchoredSpring : public ParticleForceGenerator
+    {
+    protected:
+
+        /**
+         * The location of the anchored end of the spring.
+         */
+        Vector3* anchorPoint;
+
+        /**
+         * Holds the spring constant.
+         */
+        real springConstant;
+
+        /**
+         * Holds the resting length of the spring.
+         */
+        real restLength;
+
+    public:
+
+        /**
+         * Creates a new spring with given parameters.
+         */
+        ParticleAnchoredSpring::ParticleAnchoredSpring(Vector3 anchorPoint, real springConstant, real restLength);
+        ParticleAnchoredSpring::ParticleAnchoredSpring();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
 }
 
 

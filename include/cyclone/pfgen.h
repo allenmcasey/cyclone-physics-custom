@@ -206,18 +206,37 @@ namespace cyclone {
             virtual void updateForce(Particle* particle, real duration);
     };
 
-    class ParticleSpring : ParticleForceGenerator
+    /**
+     * A force generator that applies a spring force.
+     */
+    class ParticleSpring : public ParticleForceGenerator
     {
+        /**
+         * The particle at the other end of the spring.
+         */
         Particle* other;
 
+        /**
+         * Holds the spring constant.
+         */
         real springConstant;
 
+        /**
+         * Holds the resting length of the spring.
+         */
         real restLength;
 
     public:
 
-        ParticleSpring(Particle* other, real springConstant, real restLength);
+        /**
+         * Creates a new spring with the given parameters.
+         */
+        ParticleSpring(Particle* other, real &springConstant, real &restLength);
+        ParticleSpring();
 
+        /**
+         * Applies the spring force to the given particle.
+         */
         virtual void updateForce(Particle* particle, real duration);
     };
 }

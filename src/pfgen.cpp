@@ -139,3 +139,30 @@ void ParticleUplift::updateForce(Particle* particle, real duration)
         particle->addForce(upliftForce * particle->getMass());
     }
 }
+
+ParticleSpring::ParticleSpring(Particle* other, real& springConstant, real& restLength) : 
+    other(other), 
+    springConstant(springConstant),
+    restLength(restLength)
+{
+}
+
+ParticleSpring::ParticleSpring(){}
+
+void ParticleSpring::updateForce(Particle* particle, real duration) 
+{
+    // Calculate the vector of the spring.
+    Vector3 force;
+    particle->getPosition(&force);
+    force -= other->getPosition();
+
+    // Calculate the magnituge of the spring force.
+    real magnitude = force.magnitude();
+    magnitude = real_abs(magnitude - restLength);
+    magnitude *= springConstant;
+
+    // Calculate final force and apply it.
+    force.normalise();
+    force *= -magnitude;
+    particle->addForce(force);
+}

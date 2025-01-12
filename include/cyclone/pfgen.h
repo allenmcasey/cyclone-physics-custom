@@ -342,6 +342,56 @@ namespace cyclone {
          */
         virtual void updateForce(Particle* particle, real duration);
     };
+
+    /**
+     * A force generator that applies an uplift force to particles that diminishes as they
+     */
+    class ParticleLighterThanAir : public ParticleForceGenerator
+    {
+        /**
+         * Holds the density of the particle object.
+         */
+        real particleDensity;
+
+        /**
+         * Holds the volume of the particle object.
+         */
+        real particleVolume;
+
+        /**
+         * Holds the density of the air at ground level.
+         */
+        real airDensityAtGround;
+
+        /**
+         * Describes how quickly air density decreases as altitude
+         * increases. Should be a negative value. The larger the absolute
+         * value, the faster density decreases as altitude increases.
+         */
+        real densityAltitudeSlope;
+
+        /**
+         * Gravity force generator associated with this uplift
+         * generator. Once the uplift generator gets the particle
+         * to the max uplift height, the force added to this particle
+         * is the negative of the gravity force so that the particle 
+         * levitates in place.
+         */
+        ParticleGravity gravity;
+
+    public:
+
+        /**
+         * Creates a new buoyancy force with the given parameters.
+         */
+        ParticleLighterThanAir(real particleDensity, real particleVolume, real airDensityAtGround, real densityAltitudeSlope, ParticleGravity gravity);
+        ParticleLighterThanAir();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
 }
 
 

@@ -4,7 +4,8 @@
  * Part of the Cyclone physics system.
  */
 
-
+#include <assert.h>
+#include <iostream>
 #include <cyclone/pfgen.h>
 
 using namespace cyclone;
@@ -259,4 +260,50 @@ void ParticleBuoyancy::updateForce(Particle* particle, real duration)
      */
     force.y = liquidDensity * volume * (depth - maxDepth - waterHeight) / (2 * maxDepth);
     particle->addForce(force);
+}
+
+ParticleLighterThanAir::ParticleLighterThanAir(real particleDensity, real particleVolume, real airDensityAtGround, real densityAltitudeSlope, ParticleGravity gravity) : 
+    particleDensity(particleDensity), 
+    particleVolume(particleVolume),
+    airDensityAtGround(airDensityAtGround),
+    densityAltitudeSlope(densityAltitudeSlope),
+    gravity(gravity)
+{
+    assert(particleDensity > 0);
+    assert(particleVolume > 0);
+    assert(airDensityAtGround > 0);
+    assert(densityAltitudeSlope < 0);
+}
+
+ParticleLighterThanAir::ParticleLighterThanAir(){}
+
+void ParticleLighterThanAir::updateForce(Particle* particle, real duration) 
+{
+    particle->setVelocity(cyclone::Vector3(0,0,0));
+    
+    // Base buoyancy force countering gravity
+    Vector3 force = gravity.getGravity() * -1.0f * particle->getMass();
+
+    // Calculate air density at the altitude of the particle
+    real currentAirDensity = densityAltitudeSlope * particle->getPosition().y + airDensityAtGround;
+   
+    /**
+     * If air is less dense than particle, particle is no
+     * longer rising. Set velocity to zero, add a force to
+     * counteract gravity (so that particle levitates), and exit.
+    */
+    if (currentAirDensity <= particleDensity)
+    {
+        particle->addForce(force);
+        return;
+    }
+
+    // Calculate y-component of the buoyancy force.
+    real buoyancyComponentY = (currentAirDensity - particleDensity) * particleVolume;
+
+    if (buoyancyComponentY > 0.5)
+        std::cout << buoyancyComponentY << " " << particle->getVelocity().y << std::endl;
+
+    // Apply counter-gravity plus buoyancy force.
+    particle->addForce(force + cyclone::Vector3(0, buoyancyComponentY, 0));
 }

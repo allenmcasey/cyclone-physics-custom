@@ -222,3 +222,35 @@ void ParticleBungee::updateForce(Particle* particle, real duration)
     force *= -magnitude;
     particle->addForce(force);
 }
+
+ParticleBuoyancy::ParticleBuoyancy(real maxDepth, real volume, real waterHeight, real liquidDensity) : 
+    maxDepth(maxDepth), 
+    volume(volume),
+    waterHeight(waterHeight),
+    liquidDensity(liquidDensity)
+{
+}
+
+ParticleBuoyancy::ParticleBuoyancy(){}
+
+void ParticleBuoyancy::updateForce(Particle* particle, real duration) 
+{
+    // Get submersion depth.
+    real depth = particle->getPosition().y;
+
+    // Check if particle is out of the water.
+    if (depth >= waterHeight + maxDepth) return;
+    Vector3 force(0,0,0);
+
+    // Check if at maximum depth (i.e. fully submerged)
+    if (depth <= waterHeight - maxDepth)
+    {
+        force.y = liquidDensity * volume;
+        particle->addForce(force);
+        return;
+    }
+
+    // Otherwise we're partially submerged.
+    force.y = liquidDensity * volume * (depth - maxDepth - waterHeight) / (2 * maxDepth);
+    particle->addForce(force);
+}

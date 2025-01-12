@@ -303,6 +303,45 @@ namespace cyclone {
          */
         virtual void updateForce(Particle* particle, real duration);
     };
+
+    class ParticleBuoyancy : public ParticleForceGenerator
+    {
+        /**
+         * The maximum submersion depth of the object before
+         * it generates its maximum buoyancy force (fully submerged).
+         */
+        real maxDepth;
+
+        /**
+         * The volume of the object.
+         */
+        real volume;
+
+        /**
+         * The height of the water plane above y = 0. The plane is 
+         * assumed to be parallel to the XZ plane.
+         */
+        real waterHeight;
+
+        /**
+         * The density of the liquid. Pure water has a density of
+         * 1000kg per cubic meter.
+         */
+        real liquidDensity;
+
+    public:
+
+        /**
+         * Creates a new buoyancy force with the given parameters.
+         */
+        ParticleBuoyancy(real maxDepth, real volume, real waterHeight, real liquidDensity = 1000.0f);
+        ParticleBuoyancy();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
 }
 
 

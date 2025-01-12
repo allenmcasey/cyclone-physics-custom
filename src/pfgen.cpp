@@ -250,7 +250,13 @@ void ParticleBuoyancy::updateForce(Particle* particle, real duration)
         return;
     }
 
-    // Otherwise we're partially submerged.
+    /**
+     * Otherwise we're partially submerged.
+     * 
+     *     pv(y_0 - y_w - s)
+     * F = -----------------
+     *            2s
+     */
     force.y = liquidDensity * volume * (depth - maxDepth - waterHeight) / (2 * maxDepth);
     particle->addForce(force);
 }

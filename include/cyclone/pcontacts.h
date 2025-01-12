@@ -50,6 +50,17 @@ namespace cyclone {
          */
         Vector3 contactNormal;
 
+        /**
+         * Holds the depth of penetration at the contact.
+         */
+        real penetration;
+
+        /**
+         * Holds the amount each particle is moved by during interpenetration
+         * resolution.
+         */
+        Vector3 particleMovement[2];
+
     protected:
 
         /**
@@ -68,6 +79,11 @@ namespace cyclone {
          * Handles the impulse calculations for this collision.
          */
         void resolveVelocity(real duration);
+
+        /**
+         * Handles the interpenetration resolution for this contact.
+         */
+        void resolveInterpenetration(real duration);
     };
 
 }

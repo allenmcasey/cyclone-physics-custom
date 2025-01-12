@@ -12,6 +12,7 @@ endif
 # Demo files path.
 DEMOPATH = ./src/demos/
 
+# Build directory path
 BUILDPATH = ./build/
 
 # Demo core files.
@@ -19,20 +20,24 @@ DEMOCOREFILES = $(DEMOPATH)main.cpp $(DEMOPATH)app.cpp $(DEMOPATH)timing.cpp
 
 # Demo files.
 # DEMOLIST = ballistic bigballistic blob bridge explosion fireworks flightsim fracture platform ragdoll sailboat
-DEMOLIST = ballistic uplift
+DEMOLIST = lighter
 
 # Cyclone core files.
 # CYCLONEFILES = ./src/body.cpp ./src/collide_coarse.cpp ./src/collide_fine.cpp ./src/contacts.cpp ./src/core.cpp ./src/fgen.cpp ./src/joints.cpp ./src/particle.cpp ./src/pcontacts.cpp ./src/pfgen.cpp ./src/plinks.cpp ./src/pworld.cpp ./src/random.cpp ./src/world.cpp
 CYCLONEFILES = ./src/core.cpp ./src/particle.cpp ./src/pfgen.cpp
 .PHONY: clean
 
+# Build the project
 all: build $(DEMOLIST)
 
+# Create build directory
 build:
 	mkdir ./build
 
+# Compile demo files
 $(DEMOLIST):
 	g++ -O2 -Iinclude $(DEMOCOREFILES) $(CYCLONEFILES) $(DEMOPATH)$@/$@.cpp -o $(BUILDPATH)$@ $(LDFLAGS) 
 
+# Remove build directory
 clean:
 	rm -r ./build

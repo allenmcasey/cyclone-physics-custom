@@ -205,6 +205,193 @@ namespace cyclone {
              */
             virtual void updateForce(Particle* particle, real duration);
     };
+
+    /**
+     * A force generator that applies a spring force.
+     */
+    class ParticleSpring : public ParticleForceGenerator
+    {
+        /**
+         * The particle at the other end of the spring.
+         */
+        Particle* other;
+
+        /**
+         * Holds the spring constant.
+         */
+        real springConstant;
+
+        /**
+         * Holds the resting length of the spring.
+         */
+        real restLength;
+
+    public:
+
+        /**
+         * Creates a new spring with the given parameters.
+         */
+        ParticleSpring(Particle* other, real &springConstant, real &restLength);
+        ParticleSpring();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
+
+    class ParticleAnchoredSpring : public ParticleForceGenerator
+    {
+    protected:
+
+        /**
+         * The location of the anchored end of the spring.
+         */
+        Vector3* anchorPoint;
+
+        /**
+         * Holds the spring constant.
+         */
+        real springConstant;
+
+        /**
+         * Holds the resting length of the spring.
+         */
+        real restLength;
+
+    public:
+
+        /**
+         * Creates a new spring with given parameters.
+         */
+        ParticleAnchoredSpring(Vector3* anchorPoint, real& springConstant, real& restLength);
+        ParticleAnchoredSpring();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
+
+    class ParticleBungee : public ParticleForceGenerator
+    {
+        /**
+         * The particle at the other end of the spring.
+         */
+        Particle* other;
+
+        /**
+         * Holds the spring constant.
+         */
+        real springConstant;
+
+        /**
+         * Holds the resting length of the spring.
+         */
+        real restLength;
+
+    public:
+
+        /**
+         * Creates a new spring with the given parameters.
+         */
+        ParticleBungee(Particle* other, real &springConstant, real &restLength);
+        ParticleBungee();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
+
+    class ParticleBuoyancy : public ParticleForceGenerator
+    {
+        /**
+         * The maximum submersion depth of the object before
+         * it generates its maximum buoyancy force (fully submerged).
+         */
+        real maxDepth;
+
+        /**
+         * The volume of the object.
+         */
+        real volume;
+
+        /**
+         * The height of the water plane above y = 0. The plane is 
+         * assumed to be parallel to the XZ plane.
+         */
+        real waterHeight;
+
+        /**
+         * The density of the liquid. Pure water has a density of
+         * 1000kg per cubic meter.
+         */
+        real liquidDensity;
+
+    public:
+
+        /**
+         * Creates a new buoyancy force with the given parameters.
+         */
+        ParticleBuoyancy(real maxDepth, real volume, real waterHeight, real liquidDensity = 1000.0f);
+        ParticleBuoyancy();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
+
+    /**
+     * A force generator that applies an uplift force to particles that diminishes as they
+     */
+    class ParticleLighterThanAir : public ParticleForceGenerator
+    {
+        /**
+         * Holds the density of the particle object.
+         */
+        real particleDensity;
+
+        /**
+         * Holds the volume of the particle object.
+         */
+        real particleVolume;
+
+        /**
+         * Holds the density of the air at ground level.
+         */
+        real airDensityAtGround;
+
+        /**
+         * Describes how quickly air density decreases as altitude
+         * increases. Should be a negative value. The larger the absolute
+         * value, the faster density decreases as altitude increases.
+         */
+        real densityAltitudeSlope;
+
+        /**
+         * Gravity force generator associated with this uplift
+         * generator. Once the uplift generator gets the particle
+         * to the max uplift height, the force added to this particle
+         * is the negative of the gravity force so that the particle 
+         * levitates in place.
+         */
+        ParticleGravity gravity;
+
+    public:
+
+        /**
+         * Creates a new buoyancy force with the given parameters.
+         */
+        ParticleLighterThanAir(real particleDensity, real particleVolume, real airDensityAtGround, real densityAltitudeSlope, ParticleGravity gravity);
+        ParticleLighterThanAir();
+
+        /**
+         * Applies the spring force to the given particle.
+         */
+        virtual void updateForce(Particle* particle, real duration);
+    };
 }
 
 

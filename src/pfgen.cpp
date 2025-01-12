@@ -4,7 +4,8 @@
  * Part of the Cyclone physics system.
  */
 
-
+#include <assert.h>
+#include <iostream>
 #include <cyclone/pfgen.h>
 
 using namespace cyclone;
@@ -138,4 +139,171 @@ void ParticleUplift::updateForce(Particle* particle, real duration)
         // Apply mass-scaled gravitational force to given particle.
         particle->addForce(upliftForce * particle->getMass());
     }
+}
+
+ParticleSpring::ParticleSpring(Particle* other, real& springConstant, real& restLength) : 
+    other(other), 
+    springConstant(springConstant),
+    restLength(restLength)
+{
+}
+
+ParticleSpring::ParticleSpring(){}
+
+void ParticleSpring::updateForce(Particle* particle, real duration) 
+{
+    // Calculate the vector of the spring.
+    Vector3 force;
+    particle->getPosition(&force);
+    force -= other->getPosition();
+
+    // Calculate the magnituge of the spring force.
+    real magnitude = force.magnitude();
+    magnitude = real_abs(magnitude - restLength);
+    magnitude *= springConstant;
+
+    // Calculate final force and apply it.
+    force.normalise();
+    force *= -magnitude;
+    particle->addForce(force);
+}
+
+ParticleAnchoredSpring::ParticleAnchoredSpring(Vector3* anchorPoint, real& springConstant, real& restLength) : 
+    anchorPoint(anchorPoint), 
+    springConstant(springConstant),
+    restLength(restLength)
+{
+}
+
+ParticleAnchoredSpring::ParticleAnchoredSpring(){}
+
+void ParticleAnchoredSpring::updateForce(Particle* particle, real duration)
+{
+    // Calculate the vector of the spring.
+    Vector3 force;
+    particle->getPosition(&force);
+    force -= *anchorPoint;
+
+    // Calculate the magnituge of the spring force.
+    real magnitude = force.magnitude();
+    magnitude = (magnitude - restLength) * springConstant;
+
+    // Calculate final force and apply it.
+    force.normalise();
+    force *= -magnitude;
+    particle->addForce(force);
+}
+
+
+ParticleBungee::ParticleBungee(Particle* other, real& springConstant, real& restLength) : 
+    other(other), 
+    springConstant(springConstant),
+    restLength(restLength)
+{
+}
+
+ParticleBungee::ParticleBungee(){}
+
+void ParticleBungee::updateForce(Particle* particle, real duration) 
+{
+    // Calculate the vector of the spring.
+    Vector3 force;
+    particle->getPosition(&force);
+    force -= other->getPosition();
+
+    // Check if bungee is compressed; if so, return.
+    real magnitude = force.magnitude();
+    if (magnitude <= restLength) return;
+
+    // Calculate the magnitude of the force.
+    magnitude = (restLength - magnitude) * springConstant;
+
+    // Calculate final force and apply it.
+    force.normalise();
+    force *= -magnitude;
+    particle->addForce(force);
+}
+
+ParticleBuoyancy::ParticleBuoyancy(real maxDepth, real volume, real waterHeight, real liquidDensity) : 
+    maxDepth(maxDepth), 
+    volume(volume),
+    waterHeight(waterHeight),
+    liquidDensity(liquidDensity)
+{
+}
+
+ParticleBuoyancy::ParticleBuoyancy(){}
+
+void ParticleBuoyancy::updateForce(Particle* particle, real duration) 
+{
+    // Get submersion depth.
+    real depth = particle->getPosition().y;
+
+    // Check if particle is out of the water.
+    if (depth >= waterHeight + maxDepth) return;
+    Vector3 force(0,0,0);
+
+    // Check if at maximum depth (i.e. fully submerged)
+    if (depth <= waterHeight - maxDepth)
+    {
+        force.y = liquidDensity * volume;
+        particle->addForce(force);
+        return;
+    }
+
+    /**
+     * Otherwise we're partially submerged.
+     * 
+     *     pv(y_0 - y_w - s)
+     * F = -----------------
+     *            2s
+     */
+    force.y = liquidDensity * volume * (depth - maxDepth - waterHeight) / (2 * maxDepth);
+    particle->addForce(force);
+}
+
+ParticleLighterThanAir::ParticleLighterThanAir(real particleDensity, real particleVolume, real airDensityAtGround, real densityAltitudeSlope, ParticleGravity gravity) : 
+    particleDensity(particleDensity), 
+    particleVolume(particleVolume),
+    airDensityAtGround(airDensityAtGround),
+    densityAltitudeSlope(densityAltitudeSlope),
+    gravity(gravity)
+{
+    assert(particleDensity > 0);
+    assert(particleVolume > 0);
+    assert(airDensityAtGround > 0);
+    assert(densityAltitudeSlope < 0);
+}
+
+ParticleLighterThanAir::ParticleLighterThanAir(){}
+
+void ParticleLighterThanAir::updateForce(Particle* particle, real duration) 
+{
+    particle->setVelocity(cyclone::Vector3(0,0,0));
+    
+    // Base buoyancy force countering gravity
+    Vector3 force = gravity.getGravity() * -1.0f * particle->getMass();
+
+    // Calculate air density at the altitude of the particle
+    real currentAirDensity = densityAltitudeSlope * particle->getPosition().y + airDensityAtGround;
+   
+    /**
+     * If air is less dense than particle, particle is no
+     * longer rising. Set velocity to zero, add a force to
+     * counteract gravity (so that particle levitates), and exit.
+    */
+    if (currentAirDensity <= particleDensity)
+    {
+        particle->addForce(force);
+        return;
+    }
+
+    // Calculate y-component of the buoyancy force.
+    real buoyancyComponentY = (currentAirDensity - particleDensity) * particleVolume;
+
+    if (buoyancyComponentY > 0.5)
+        std::cout << buoyancyComponentY << " " << particle->getVelocity().y << std::endl;
+
+    // Apply counter-gravity plus buoyancy force.
+    particle->addForce(force + cyclone::Vector3(0, buoyancyComponentY, 0));
 }

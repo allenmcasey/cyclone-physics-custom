@@ -12,6 +12,7 @@ endif
 # Demo files path.
 DEMOPATH = ./src/demos/
 
+# Build directory path
 BUILDPATH = ./build/
 
 # Demo core files.
@@ -26,13 +27,17 @@ DEMOLIST = ballistic uplift
 CYCLONEFILES = ./src/core.cpp ./src/particle.cpp ./src/pfgen.cpp
 .PHONY: clean
 
+# Build the project
 all: build $(DEMOLIST)
 
+# Create build directory
 build:
 	mkdir ./build
 
+# Compile demo files
 $(DEMOLIST):
 	g++ -O2 -Iinclude $(DEMOCOREFILES) $(CYCLONEFILES) $(DEMOPATH)$@/$@.cpp -o $(BUILDPATH)$@ $(LDFLAGS) 
 
+# Remove build directory
 clean:
 	rm -r ./build

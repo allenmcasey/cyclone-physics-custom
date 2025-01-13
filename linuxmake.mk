@@ -23,8 +23,8 @@ DEMOCOREFILES = $(DEMOPATH)main.cpp $(DEMOPATH)app.cpp $(DEMOPATH)timing.cpp
 DEMOLIST = lighter ballistic
 
 # Cyclone core files.
-# CYCLONEFILES = ./src/body.cpp ./src/collide_coarse.cpp ./src/collide_fine.cpp ./src/contacts.cpp ./src/fgen.cpp ./src/joints.cpp ./src/plinks.cpp ./src/pworld.cpp ./src/random.cpp ./src/world.cpp
-CYCLONEFILES = ./src/core.cpp ./src/particle.cpp ./src/pfgen.cpp ./src/pcontacts.cpp ./src/plinks.cpp
+# CYCLONEFILES = ./src/body.cpp ./src/collide_coarse.cpp ./src/collide_fine.cpp ./src/contacts.cpp ./src/fgen.cpp ./src/joints.cpp ./src/random.cpp ./src/world.cpp
+CYCLONEFILES = ./src/core.cpp ./src/particle.cpp ./src/pfgen.cpp ./src/pcontacts.cpp ./src/plinks.cpp ./src/pworld.cpp 
 .PHONY: clean
 
 # Build the project

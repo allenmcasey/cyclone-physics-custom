@@ -31,6 +31,12 @@ namespace cyclone {
      */
     class ParticleContact
     {
+        /**
+         * The contact resolver object needs access into the contacts to
+         * set and effect the contact.
+         */
+        friend class ParticleContactResolver;
+        
     public:
 
         /**
@@ -86,6 +92,40 @@ namespace cyclone {
         void resolveInterpenetration(real duration);
     };
 
+    class ParticleContactResolver
+    {
+    protected:
+
+        /**
+         * Holds the maximum number of iterations allowed for resolution.
+         */
+        unsigned iterations;
+
+        /**
+         * This is a performance tracking value; we keep a record of the 
+         * actual number of iterations used to resolve all contacts.
+         */
+        unsigned iterationsUsed;
+
+    public:
+
+        /**
+         * Creates a new contact resolver.
+         */
+        ParticleContactResolver(unsigned iterations);
+        ParticleContactResolver();
+
+        /**
+         * Sets the number of iterations that can be used.
+         */
+        void setIterations(unsigned iterations);
+
+        /**
+         * Resolves a set of particle contacts for both penetration
+         * and velocity.
+         */
+        void resolveContacts(ParticleContact* contactArray, unsigned numContacts, real duration);
+    };
 }
 
 #endif // CYCLONE_PCONTACTS_H

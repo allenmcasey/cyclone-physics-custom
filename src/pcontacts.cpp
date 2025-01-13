@@ -32,7 +32,7 @@ void ParticleContact::resolveVelocity(real duration)
     // Check if it needs to be resolved.
     if (separatingVelocity > 0)
     {
-        // The contact is either separting or stationary;
+        // The contact is either separating or stationary;
         // no impulse is required.
         return;
     }
@@ -120,5 +120,32 @@ void ParticleContact::resolveInterpenetration(real duration)
     if (particle[1])
     {
         particle[1]->setPosition(particle[1]->getPosition() + particleMovement[1]);
+    }
+}
+
+void ParticleContactResolver::resolveContacts(ParticleContact* contactArray, unsigned numContacts, real duration)
+{
+    iterationsUsed = 0;
+    while (iterationsUsed < iterations)
+    {
+        // Find contact with the larges closing velocity.
+        real max = REAL_MAX;
+        unsigned maxIndex = numContacts;
+        for (unsigned i = 0; i < numContacts; i++)
+        {
+            real sepVel = contactArray[i].calculateSeparatingVelocity();
+            if (sepVel < max && (sepVel < 0 || contactArray[i].penetration > 0))
+            {
+                max = sepVel;
+                maxIndex = i;
+            }
+        }
+
+        // Did we find a particle worth resolving?
+        if (maxIndex == numContacts) break;
+
+        // Resolve this contact.
+        contactArray[maxIndex].resolve(duration);
+        iterationsUsed++;
     }
 }

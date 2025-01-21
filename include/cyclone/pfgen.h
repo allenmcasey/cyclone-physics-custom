@@ -392,6 +392,41 @@ namespace cyclone {
          */
         virtual void updateForce(Particle* particle, real duration);
     };
+
+    /**
+     * A force generator used to apply a force on the edge of a wheel
+     * The force is always tangential to the wheel surface.
+     */
+    class ParticleWheelRoller : public ParticleForceGenerator
+    {
+        /**
+         * The particle at the center of the wheel.
+         */
+        Particle* wheelCenter;
+
+        /**
+         * Holds the scalar force value for roll speed.
+         */
+        real rollForceScalar;
+
+        public:
+
+            /**
+             * Creates the generator with the given acceleration.
+             */
+            ParticleWheelRoller(Particle* wheelCenter, const real &rollForceScalar);
+            ParticleWheelRoller();
+
+            /**
+             * Returns this force generator's gravity vector.
+             */
+            real getRollForceScalar() const;
+
+            /**
+             * Applies the gravitational force to the given particle.
+             */
+            virtual void updateForce(Particle* particle, real duration);
+    };
 }
 
 

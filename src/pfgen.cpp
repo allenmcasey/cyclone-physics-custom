@@ -308,3 +308,28 @@ void ParticleLighterThanAir::updateForce(Particle* particle, real duration)
     // Apply counter-gravity plus buoyancy force.
     particle->addForce(force + cyclone::Vector3(0, buoyancyComponentY, 0));
 }
+
+ParticleWheelRoller::ParticleWheelRoller(){}
+
+ParticleWheelRoller::ParticleWheelRoller(Particle* wheelCenter, const real& rollForceScalar)
+: wheelCenter(wheelCenter), rollForceScalar(rollForceScalar)
+{
+}
+
+void ParticleWheelRoller::updateForce(Particle* particle, real duration)
+{
+    // Check that we do not have infinite mass
+    if (!particle->hasFiniteMass()) return;
+
+    // Get vector from this particle to wheel center
+    Vector3 spokeVector = wheelCenter->getPosition() - particle->getPosition();
+
+    // Get tangent vector along which we'll add force
+    Vector3 forceVector = spokeVector.vectorProduct(Vector3(0,0,1));
+    forceVector.normalise();
+
+    // Apply the mass-scaled force to the particle
+    particle->addForce(forceVector * rollForceScalar * particle->getMass());
+
+    std::cout << forceVector.x << " " << forceVector.y << " " << forceVector.z << std::endl;
+}

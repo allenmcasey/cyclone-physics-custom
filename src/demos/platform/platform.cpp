@@ -72,7 +72,15 @@ massPos(0,0,0.5f)
     particleArray[5].setPosition(4,2,-1);
     for (unsigned i = 0; i < 6; i++)
     {
-        particleArray[i].setMass(BASE_MASS);
+        if (i < 2)
+        {
+            particleArray[i].setInverseMass(0);
+        }
+        else
+        {
+            particleArray[i].setMass(BASE_MASS);
+        }
+        
         particleArray[i].setVelocity(0,0,0);
         particleArray[i].setDamping(0.9f);
         particleArray[i].setAcceleration(cyclone::Vector3::GRAVITY);
@@ -233,19 +241,19 @@ void PlatformDemo::key(unsigned char key)
     switch(key)
     {
     case 'w': case 'W':
-        massPos.z += 0.1f;
+        massPos.z += 0.05f;
         if (massPos.z > 1.0f) massPos.z = 1.0f;
         break;
     case 's': case 'S':
-        massPos.z -= 0.1f;
+        massPos.z -= 0.05f;
         if (massPos.z < 0.0f) massPos.z = 0.0f;
         break;
     case 'a': case 'A':
-        massPos.x -= 0.1f;
+        massPos.x -= 0.05f;
         if (massPos.x < 0.0f) massPos.x = 0.0f;
         break;
     case 'd': case 'D':
-        massPos.x += 0.1f;
+        massPos.x += 0.05f;
         if (massPos.x > 1.0f) massPos.x = 1.0f;
         break;
 

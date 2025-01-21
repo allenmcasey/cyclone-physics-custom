@@ -46,7 +46,7 @@ unsigned ParticleRod::addContact(ParticleContact* contact, unsigned limit) const
     real currentLen = currentLength();
 
     // If rod is nominal length, return.
-    if (currentLen = length) return 0;
+    if (currentLen == length) return 0;
 
     // Otherwise, return the contact.
     contact->particle[0] = particle[0];
@@ -73,5 +73,38 @@ unsigned ParticleRod::addContact(ParticleContact* contact, unsigned limit) const
     // (We don't want any bounciness).
     contact->restitution = 0;
     
+    return 1;
+}
+
+real ParticleConstraint::currentLength() const
+{
+    Vector3 relativePos = particle->getPosition() - anchor;
+    return relativePos.magnitude();
+}
+
+unsigned ParticleCableConstraint::addContact(ParticleContact *contact,
+                                   unsigned limit) const
+{
+    // Find the length of the cable
+    real length = currentLength();
+
+    // Check if we're over-extended
+    if (length < maxLength)
+    {
+        return 0;
+    }
+
+    // Otherwise return the contact
+    contact->particle[0] = particle;
+    contact->particle[1] = 0;
+
+    // Calculate the normal
+    Vector3 normal = anchor - particle->getPosition();
+    normal.normalise();
+    contact->contactNormal = normal;
+
+    contact->penetration = length-maxLength;
+    contact->restitution = restitution;
+
     return 1;
 }

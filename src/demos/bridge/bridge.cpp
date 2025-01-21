@@ -89,7 +89,7 @@ massPos(0,0,0.5f)
         cables[i].particle[0] = &particleArray[i];
         cables[i].particle[1] = &particleArray[i+2];
         cables[i].maxLength = 1.9f;
-        cables[i].restitution = 0.3f;
+        cables[i].restitution = 0.8f;
         world.getContactGenerators().push_back(&cables[i]);
     }
 
@@ -104,7 +104,7 @@ massPos(0,0,0.5f)
             );
         if (i < 6) supports[i].maxLength = cyclone::real(i/2)*0.5f + 3.0f;
         else supports[i].maxLength = 5.5f - cyclone::real(i/2)*0.5f;
-        supports[i].restitution = 0.5f;
+        supports[i].restitution = 0.6f;
         world.getContactGenerators().push_back(&supports[i]);
     }
 

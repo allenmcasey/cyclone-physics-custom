@@ -67,7 +67,7 @@ void ParticleContact::resolveVelocity(real duration)
     if (particle[1]) totalInverseMass += particle[1]->getInverseMass();
 
     // If all particles have infinite mass, then impulses have no effect.
-    if (totalInverseMass <= 0) return;
+    if (totalInverseMass <= 0) return; 
 
     // Calculate the impulse to apply.
     real impulse = deltaVelocity / totalInverseMass;
@@ -83,7 +83,7 @@ void ParticleContact::resolveVelocity(real duration)
     {
         // Particle 1 goes in the opposite direction.
         particle[1]->setVelocity(particle[1]->getVelocity() +
-                                impulsePerIMass * -particle[0]->getInverseMass());
+                                impulsePerIMass * -particle[1]->getInverseMass());
     }
 }
 
@@ -108,7 +108,7 @@ void ParticleContact::resolveInterpenetration(real duration)
     particleMovement[0] = movePerIMass * particle[0]->getInverseMass();
     if (particle[1])
     {
-        particleMovement[1] = movePerIMass * particle[1]->getInverseMass();
+        particleMovement[1] = movePerIMass * -particle[1]->getInverseMass();
     }
     else
     {
@@ -123,12 +123,15 @@ void ParticleContact::resolveInterpenetration(real duration)
     }
 }
 
+ParticleContactResolver::ParticleContactResolver(unsigned iterations) : iterations(iterations){};
+ParticleContactResolver::ParticleContactResolver(){}
+
 void ParticleContactResolver::resolveContacts(ParticleContact* contactArray, unsigned numContacts, real duration)
 {
     iterationsUsed = 0;
     while (iterationsUsed < iterations)
     {
-        // Find contact with the larges closing velocity.
+        // Find contact with the largest closing velocity.
         real max = REAL_MAX;
         unsigned maxIndex = numContacts;
         for (unsigned i = 0; i < numContacts; i++)
@@ -146,6 +149,37 @@ void ParticleContactResolver::resolveContacts(ParticleContact* contactArray, uns
 
         // Resolve this contact.
         contactArray[maxIndex].resolve(duration);
+
+        // Update the interpenetrations for all particles
+        Vector3 *move = contactArray[maxIndex].particleMovement;
+        for (unsigned i = 0; i < numContacts; i++)
+        {
+            if (contactArray[i].particle[0] == contactArray[maxIndex].particle[0])
+            {
+                contactArray[i].penetration -= move[0] * contactArray[i].contactNormal;
+            }
+            else if (contactArray[i].particle[0] == contactArray[maxIndex].particle[1])
+            {
+                contactArray[i].penetration -= move[1] * contactArray[i].contactNormal;
+            }
+            if (contactArray[i].particle[1])
+            {
+                if (contactArray[i].particle[1] == contactArray[maxIndex].particle[0])
+                {
+                    contactArray[i].penetration += move[0] * contactArray[i].contactNormal;
+                }
+                else if (contactArray[i].particle[1] == contactArray[maxIndex].particle[1])
+                {
+                    contactArray[i].penetration += move[1] * contactArray[i].contactNormal;
+                }
+            }
+        }
+
         iterationsUsed++;
     }
+}
+
+void ParticleContactResolver::setIterations(unsigned iterations)
+{
+    ParticleContactResolver::iterations = iterations;
 }

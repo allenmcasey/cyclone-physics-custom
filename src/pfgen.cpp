@@ -159,7 +159,7 @@ void ParticleSpring::updateForce(Particle* particle, real duration)
 
     // Calculate the magnituge of the spring force.
     real magnitude = force.magnitude();
-    magnitude = real_abs(magnitude - restLength);
+    magnitude = magnitude - restLength;
     magnitude *= springConstant;
 
     // Calculate final force and apply it.
@@ -179,12 +179,13 @@ ParticleAnchoredSpring::ParticleAnchoredSpring(){}
 
 void ParticleAnchoredSpring::updateForce(Particle* particle, real duration)
 {
-    // Calculate the vector of the spring.
+    // Calculate the vector of the spring (anchor -> particle)
     Vector3 force;
     particle->getPosition(&force);
     force -= *anchorPoint;
 
     // Calculate the magnituge of the spring force.
+    // If spring is stretched, 
     real magnitude = force.magnitude();
     magnitude = (magnitude - restLength) * springConstant;
 
